@@ -77,10 +77,6 @@ class Cron:
         Explains why a pattern matches a datetime.
         """
         _when = when.astimezone(self.tz)
-        print({
-            field: GETTER[field](when)
-            for field in FIELDS
-        })
         return tuple(
             self.tester[field](GETTER[field](when))
             for field in FIELDS
