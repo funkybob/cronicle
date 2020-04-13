@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A small tool for processing crontab syntax"
 authors = ["Curtis Maloney <curtis@tinbrain.net>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6"
