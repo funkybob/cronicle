@@ -1,6 +1,0 @@
-setup.py
-src/cronicle.py
-src/cronicle.egg-info/PKG-INFO
-src/cronicle.egg-info/SOURCES.txt
-src/cronicle.egg-info/dependency_links.txt
-src/cronicle.egg-info/top_level.txt
