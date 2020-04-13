@@ -5,66 +5,63 @@ from datetime import datetime, tzinfo, timezone
 from functools import partial
 from typing import Tuple
 
-FIELDS = ["minute", "hour", "dom", "month", "dow"]
+Pattern = namedtuple("Patter", ["minute", "hour", "dom", "month", "dow"])
 
 slash_re = re.compile(r"^\*/(\d+)$")
-list_re = re.compile(r"(\d+)(?:,(\d+))+$")
+range_re = re.compile(r"(\d+)-(\d+)$")
+
 
 def match_splot(value):
     return True
 
+
 def match_slash(value, *, divisor):
     return value % divisor == 0
 
-def match_list(value, *, values):
-    return value in values
+
+def match_range(value, *, start, end):
+    return start <= value <= end
+
 
 def match_value(value, *, match):
     return value == match
 
 
-GETTER = {
-    'minute': lambda when: when.minute,
-    'hour': lambda when: when.hour,
-    'dom': lambda when: when.day,
-    'month': lambda when: when.month,
-    'dow': lambda when: when.weekday(),
-}
+def parse_field(field):
+    terms = field.split(",")
+
+    matchers = [build_matcher(term) for term in terms]
+    return matchers
+
+
+def build_matcher(term):
+    if term == "*":
+        return match_splot
+
+    m = slash_re.search(term)
+    if m:
+        return partial(match_slash, divisor=int(m.group(1)))
+
+    m = range_re.search(term)
+    if m:
+        return partial(match_range, start=int(m.group(1)), end=int(m.group(2)))
+
+    try:
+        val = int(term)
+    except ValueError:
+        raise ValueError("Invalid pattern: %s is not a number" % (term,))
+
+    return partial(match_value, match=val)
 
 
 class Cron:
     def __init__(self, pattern: str, timezone: tzinfo = timezone.utc):
         self.tz = timezone
-        self.pattern = pattern
+        self.fragments = pattern.split(" ")
+        self.pattern = Pattern(*self.fragments)
 
-        frags = pattern.split(' ')
-        if len(frags) != len(FIELDS):
-            raise ValueError('Invalid pattern: wrong number of fields.')
-
-        # A map of {field: match} functions per field
-        self.tester = {
-            field: self._get_tester(frag)
-            for field, frag in zip(FIELDS, frags)
-        }
-
-    def _get_tester(self, frag: str):
-        if frag == '*':
-            return match_splot
-
-        m = slash_re.search(frag)
-        if m:
-            return partial(match_slash, divisor=int(m.group(1)))
-
-        m = list_re.search(frag)
-        if m:
-            return partial(match_list, values=[int(x) for x in frag.split(",")])
-
-        try:
-            val = int(frag)
-        except ValueError:
-            raise ValueError("Invalid pattern: %s is not a number" % (frag,))
-
-        return partial(match_value, match=val)
+        if len(self.fragments) != len(Pattern._fields):
+            raise ValueError("Invalid pattern: wrong number of fields.")
 
     def matches(self, when: datetime) -> bool:
         """
@@ -77,7 +74,35 @@ class Cron:
         Explains why a pattern matches a datetime.
         """
         _when = when.astimezone(self.tz)
-        return tuple(
-            self.tester[field](GETTER[field](when))
-            for field in FIELDS
+        return (
+            self.match_minutes(_when),
+            self.match_hour(_when),
+            self.match_dom(_when),
+            self.match_month(_when),
+            self.match_dow(_when),
         )
+
+    def match_minutes(self, when):
+        matchers = parse_field(self.pattern.minute)
+        value = when.minute
+        return any([matcher(value) for matcher in matchers])
+
+    def match_hour(self, when):
+        matchers = parse_field(self.pattern.hour)
+        value = when.hour
+        return any([matcher(value) for matcher in matchers])
+
+    def match_dom(self, when):
+        matchers = parse_field(self.pattern.dom)
+        value = when.day
+        return any([matcher(value) for matcher in matchers])
+
+    def match_month(self, when):
+        matchers = parse_field(self.pattern.month)
+        value = when.month
+        return any([matcher(value) for matcher in matchers])
+
+    def match_dow(self, when):
+        matchers = parse_field(self.pattern.dow)
+        value = when.weekday()
+        return any([matcher(value) for matcher in matchers])
