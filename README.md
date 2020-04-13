@@ -23,16 +23,15 @@ A simple tool for testing [crontab](https://en.wikipedia.org/wiki/Cron) like syn
 
 ### Supported syntax:
 
-1. * - match any value
+1. \* - match any value
 2. 1 - match exact value
-3. */5 - match every 5th value
+3. \*/5 - match every 5th value
 4. 1,3,4 - match values from list
 
 ### Unsupported syntax:
 
 5. 1-3 - match values in a range
 6. 1-3,7-9 - match ranges from list
-
 
 ## Timezone Support
 
