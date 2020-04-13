@@ -19,7 +19,7 @@ A simple tool for testing [crontab](https://en.wikipedia.org/wiki/Cron) like syn
     >>> c.why(d) # Ask which fragment of the rule did not match
     [True, True, True, True, False]
 
-## cron syntax
+## crontab rule syntax
 
 ### Supported syntax:
 
