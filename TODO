@@ -2,3 +2,6 @@
 - support month names (i18n issues?)
 - support ranges
 - support lists of ranges?
+
+- Be pre-emptive on parsing pattern
+- Offer pattern validation
