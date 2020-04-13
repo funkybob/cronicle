@@ -19,14 +19,24 @@ A simple tool for testing [crontab](https://en.wikipedia.org/wiki/Cron) like syn
     >>> c.why(d) # Ask which fragment of the rule did not match
     [True, True, True, True, False]
 
-## Supported syntax:
+## cron syntax
+
+### Supported syntax:
 
 1. * - match any value
 2. 1 - match exact value
 3. */5 - match every 5th value
 4. 1,3,4 - match values from list
 
-## Unsupported syntax:
+### Unsupported syntax:
 
 5. 1-3 - match values in a range
 6. 1-3,7-9 - match ranges from list
+
+
+## Timezone Support
+
+Optionally, you can pass a `datetime.tzinfo` as the second argument. It
+defaults to `datetime.timezone.utc`.
+
+Any `datetime` passed for testing will first be moved to that timezone.
