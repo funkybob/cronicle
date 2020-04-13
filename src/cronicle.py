@@ -7,6 +7,7 @@ from typing import Tuple
 Pattern = namedtuple("Pattern", "minute hour dom month dow")
 
 slash_re = re.compile(r"^\*/(\d+)$")
+list_re = re.compile(r"(\d+)(?:,(\d+))+$")
 
 
 class Cron:
@@ -43,6 +44,10 @@ class Cron:
         m = slash_re.search(frag)
         if m:
             return value % int(m.group(1)) == 0
+
+        m = list_re.search(frag)
+        if m:
+            return value in [int(x) for x in frag.split(",")]
 
         try:
             val = int(frag)
