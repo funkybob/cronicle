@@ -23,6 +23,19 @@ class Cron:
             self.match_dow(_when),
         ])
 
+    def why(self, when: datetime):
+        """
+        Explains why a pattern matches a datetime.
+        """
+        _when = when.astimezone(self.tz)
+        return [
+            self.match_minute(_when),
+            self.match_hour(_when),
+            self.match_dom(_when),
+            self.match_month(_when),
+            self.match_dow(_when),
+        ]
+
     @staticmethod
     def _match(frag: str, value: int):
         '''
