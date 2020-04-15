@@ -6,15 +6,28 @@ from cronicle import Cron
 
 
 @pytest.mark.parametrize('pattern, when, match', [
-    ('* * * * *', datetime.now(), True),
-    ('0 * * * *', datetime(2020, 4, 13, 11, 0), True),
-    ('0 * * * *', datetime(2020, 4, 13, 11, 1), False),
-    ('*/5 * * * *', datetime(2020, 4, 13, 11, 0), True),
-    ('*/5 * * * *', datetime(2020, 4, 13, 11, 1), False),
-    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 1), True),
-    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 5), True),
-    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 12), True),
-    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 13), False),
+    ('* * * * *', datetime.now(tz=timezone.utc), True),
+    ('0 * * * *', datetime(2020, 4, 13, 11, 0, tzinfo=timezone.utc), True),
+    ('0 * * * *', datetime(2020, 4, 13, 11, 1, tzinfo=timezone.utc), False),
+    ('*/5 * * * *', datetime(2020, 4, 13, 11, 0, tzinfo=timezone.utc), True),
+    ('*/5 * * * *', datetime(2020, 4, 13, 11, 1, tzinfo=timezone.utc), False),
+    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 1, tzinfo=timezone.utc), True),
+    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 5, tzinfo=timezone.utc), True),
+    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 12, tzinfo=timezone.utc), True),
+    ('1,5,12 * * * *', datetime(2020, 4, 13, 11, 13, tzinfo=timezone.utc), False),
+
+    # '0 0 1 1 *',
+    ('@yearly', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc), True),
+    ('@annually', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc), True),
+    # '0 0 1 * *'
+    ('@monthly', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc), True),
+    # '0 0 * * 0'
+    ('@weekly', datetime(2020, 1, 6, 0, 0, tzinfo=timezone.utc), True),
+    # '0 0 * * *'
+    ('@daily', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc), True),
+    ('@midnight', datetime(2020, 1, 1, 0, 0, tzinfo=timezone.utc), True),
+    # '0 * * * *'
+    ('@hourly', datetime(2020, 1, 1, 1, 0, tzinfo=timezone.utc), True),
 ])
 def test_matches(pattern, when, match):
     assert Cron(pattern).matches(when) == match
