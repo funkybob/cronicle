@@ -19,7 +19,6 @@ SHORTHAND_MAP = {
     '@daily': '0 0 * * *',
     '@midnight': '0 0 * * *',
     '@hourly': '0 * * * *',
-    # '@reboot'...
 }
 
 def match_splot(value):

@@ -29,12 +29,13 @@ A simple tool for testing [crontab](https://en.wikipedia.org/wiki/Cron) like syn
 4. 1,3,4 - match values from list
 5. 1-3 - match values in a range
 6. 1-3,7,\*/2 - combinations!
+7. @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly
 
 ### Unsupported syntax:
 
 - Day names
 - Month names
-- @rules
+- @reboot
 
 ## Timezone Support
 
