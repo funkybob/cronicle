@@ -1,10 +1,10 @@
-# Cronicle
+# Cronparse
 
 A simple tool for testing [crontab](https://en.wikipedia.org/wiki/Cron) like syntax.
 
 ## Usage
 
-    >>> from cronicle import Cron
+    >>> from cronparse import Cron
     >>> c = Cron('*/5 * * * 0')  # Matches only on Mondays, every 5th minute
     >>> from datetime import datetime
     >>> d = datetime(2020, 4, 13, 11, 5)
