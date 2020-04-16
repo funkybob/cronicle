@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cronicle"
+name = "cronparse"
 version = "0.1.0"
 description = "A small tool for processing crontab syntax"
 authors = ["Curtis Maloney <curtis@tinbrain.net>"]

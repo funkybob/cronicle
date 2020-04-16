@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from cronicle import Cron
+from cronparse import Cron
 
 
 @pytest.mark.parametrize('pattern, when, match', [
