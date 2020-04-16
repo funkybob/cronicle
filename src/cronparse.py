@@ -22,6 +22,21 @@ SHORTHAND_MAP = {
 }
 
 
+class oneshot:
+    def __init__(self, func):
+        self.func = func
+        self.name = func.__name__
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, instance, cls=None):
+        if instance is None:
+            return self
+        result = instance.__dict__[self.name] = self.func(instance)
+        return result
+
+
 def match_splot(value):
     return True
 
@@ -86,34 +101,49 @@ class Cron:
         """
         _when = when.astimezone(self.tz)
         return (
-            self.match_minutes(_when),
+            self.match_minute(_when),
             self.match_hour(_when),
             self.match_dom(_when),
             self.match_month(_when),
             self.match_dow(_when),
         )
 
-    def match_minutes(self, when):
-        matchers = parse_field(self.pattern.minute)
+    @oneshot
+    def minute_matchers(self):
+        return parse_field(self.pattern.minute)
+
+    @oneshot
+    def hour_matchers(self):
+        return parse_field(self.pattern.hour)
+
+    @oneshot
+    def dom_matchers(self):
+        return parse_field(self.pattern.dom)
+
+    @oneshot
+    def month_matchers(self):
+        return parse_field(self.pattern.month)
+
+    @oneshot
+    def dow_matchers(self):
+        return parse_field(self.pattern.dow)
+
+    def match_minute(self, when):
         value = when.minute
-        return any([matcher(value) for matcher in matchers])
+        return any([matcher(value) for matcher in self.minute_matchers])
 
     def match_hour(self, when):
-        matchers = parse_field(self.pattern.hour)
         value = when.hour
-        return any([matcher(value) for matcher in matchers])
+        return any([matcher(value) for matcher in self.hour_matchers])
 
     def match_dom(self, when):
-        matchers = parse_field(self.pattern.dom)
         value = when.day
-        return any([matcher(value) for matcher in matchers])
+        return any([matcher(value) for matcher in self.dom_matchers])
 
     def match_month(self, when):
-        matchers = parse_field(self.pattern.month)
         value = when.month
-        return any([matcher(value) for matcher in matchers])
+        return any([matcher(value) for matcher in self.month_matchers])
 
     def match_dow(self, when):
-        matchers = parse_field(self.pattern.dow)
         value = when.weekday()
-        return any([matcher(value) for matcher in matchers])
+        return any([matcher(value) for matcher in self.dow_matchers])
