@@ -77,19 +77,19 @@ def test_why(pattern, match):
 
 
 @pytest.mark.parametrize(
-    "pattern, exc, msg",
+    "pattern, msg",
     [
       # Non numbers
-      ("A * * * *", ValueError, "Invalid pattern: A is not a number"),
-      ("* A * * *", ValueError, "Invalid pattern: A is not a number"),
-      ("* * A * *", ValueError, "Invalid pattern: A is not a number"),
-      ("* * * A *", ValueError, "Invalid pattern: A is not a number"),
-      ("* * * * A", ValueError, "Invalid pattern: A is not a number"),
+      ("A * * * *", "Invalid pattern: A is not a number"),
+      ("* A * * *", "Invalid pattern: A is not a number"),
+      ("* * A * *", "Invalid pattern: A is not a number"),
+      ("* * * A *", "Invalid pattern: A is not a number"),
+      ("* * * * A", "Invalid pattern: A is not a number"),
       # Wrong field count
-      ("* * ** *", ValueError, "Invalid pattern: could not parse"),
+      ("* * ** *", "Incorrect number of pattern fields: 4"),
+      ("* * * * * *", "Incorrect number of pattern fields: 6"),
     ]
 )
-def test_invalid(pattern, exc, msg):
-    with pytest.raises(exc, match=msg):
+def test_invalid(pattern, msg):
+    with pytest.raises(ValueError, match=msg):
         Cron(pattern)
-
