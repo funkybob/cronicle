@@ -5,11 +5,6 @@ from datetime import datetime, tzinfo, timezone
 from functools import partial
 from typing import Tuple
 
-Pattern = namedtuple("Pattern", ["minute", "hour", "dom", "month", "dow"])
-
-slash_re = re.compile(r"^\*/(\d+)$")
-range_re = re.compile(r"(\d+)-(\d+)$")
-
 
 SHORTHAND_MAP = {
     "@yearly": "0 0 1 1 *",
@@ -20,6 +15,22 @@ SHORTHAND_MAP = {
     "@midnight": "0 0 * * *",
     "@hourly": "0 * * * *",
 }
+
+
+class Pattern(namedtuple("_Pattern", ["minute", "hour", "dom", "month", "dow"])):
+    @classmethod
+    def parse(cls, pattern: str) -> "Pattern":
+        """
+        Factory to produce a new Pattern from a string.
+        """
+        fragments = SHORTHAND_MAP.get(pattern, pattern).split(" ")
+        if len(fragments) != 5:
+            raise ValueError(f"Incorrect number of pattern fields: {len(fragments)}")
+        return cls._make(fragments)
+
+
+slash_re = re.compile(r"^\*/(\d+)$")
+range_re = re.compile(r"(\d+)-(\d+)$")
 
 
 def match_splot(value):
@@ -68,12 +79,8 @@ def parse_field(field):
 class Cron:
     def __init__(self, pattern: str, timezone: tzinfo = timezone.utc):
         self.tz = timezone
-        self.fragments = SHORTHAND_MAP.get(pattern, pattern).split(" ")
-        try:
-            self.pattern = Pattern(*self.fragments)
-        except TypeError:
-            raise ValueError("Invalid pattern: could not parse")
-        self.matchers = Pattern(*[parse_field(field) for field in self.pattern])
+        self.pattern = Pattern.parse(pattern)
+        self.matchers = Pattern._make(parse_field(field) for field in self.pattern)
 
     def matches(self, when: datetime) -> bool:
         """
