@@ -73,3 +73,23 @@ def test_why(pattern, match):
     when = datetime(2020, 4, 14, 11, 15, tzinfo=timezone.utc)
 
     assert Cron(pattern).why(when) == match
+
+
+
+@pytest.mark.parametrize(
+    "pattern, exc, msg",
+    [
+      # Non numbers
+      ("A * * * *", ValueError, "Invalid pattern: A is not a number"),
+      ("* A * * *", ValueError, "Invalid pattern: A is not a number"),
+      ("* * A * *", ValueError, "Invalid pattern: A is not a number"),
+      ("* * * A *", ValueError, "Invalid pattern: A is not a number"),
+      ("* * * * A", ValueError, "Invalid pattern: A is not a number"),
+      # Wrong field count
+      ("* * ** *", ValueError, "Invalid pattern: could not parse"),
+    ]
+)
+def test_invalid(pattern, exc, msg):
+    with pytest.raises(exc, match=msg):
+        Cron(pattern)
+

@@ -22,21 +22,6 @@ SHORTHAND_MAP = {
 }
 
 
-class oneshot:
-    def __init__(self, func):
-        self.func = func
-        self.name = func.__name__
-
-    def __set_name__(self, owner, name):
-        self.name = name
-
-    def __get__(self, instance, cls=None):
-        if instance is None:
-            return self
-        result = instance.__dict__[self.name] = self.func(instance)
-        return result
-
-
 def match_splot(value):
     return True
 
@@ -51,13 +36,6 @@ def match_range(value, *, start, end):
 
 def match_value(value, *, match):
     return value == match
-
-
-def parse_field(field):
-    terms = field.split(",")
-
-    matchers = [build_matcher(term) for term in terms]
-    return matchers
 
 
 def build_matcher(term):
@@ -80,14 +58,22 @@ def build_matcher(term):
     return partial(match_value, match=val)
 
 
+def parse_field(field):
+    terms = field.split(",")
+
+    matchers = [build_matcher(term) for term in terms]
+    return matchers
+
+
 class Cron:
     def __init__(self, pattern: str, timezone: tzinfo = timezone.utc):
         self.tz = timezone
         self.fragments = SHORTHAND_MAP.get(pattern, pattern).split(" ")
-        self.pattern = Pattern(*self.fragments)
-
-        if len(self.fragments) != len(Pattern._fields):
-            raise ValueError("Invalid pattern: wrong number of fields.")
+        try:
+            self.pattern = Pattern(*self.fragments)
+        except TypeError:
+            raise ValueError("Invalid pattern: could not parse")
+        self.matchers = Pattern(*[parse_field(field) for field in self.pattern])
 
     def matches(self, when: datetime) -> bool:
         """
@@ -108,42 +94,22 @@ class Cron:
             self.match_dow(_when),
         )
 
-    @oneshot
-    def minute_matchers(self):
-        return parse_field(self.pattern.minute)
-
-    @oneshot
-    def hour_matchers(self):
-        return parse_field(self.pattern.hour)
-
-    @oneshot
-    def dom_matchers(self):
-        return parse_field(self.pattern.dom)
-
-    @oneshot
-    def month_matchers(self):
-        return parse_field(self.pattern.month)
-
-    @oneshot
-    def dow_matchers(self):
-        return parse_field(self.pattern.dow)
-
     def match_minute(self, when):
         value = when.minute
-        return any([matcher(value) for matcher in self.minute_matchers])
+        return any([matcher(value) for matcher in self.matchers.minute])
 
     def match_hour(self, when):
         value = when.hour
-        return any([matcher(value) for matcher in self.hour_matchers])
+        return any([matcher(value) for matcher in self.matchers.hour])
 
     def match_dom(self, when):
         value = when.day
-        return any([matcher(value) for matcher in self.dom_matchers])
+        return any([matcher(value) for matcher in self.matchers.dom])
 
     def match_month(self, when):
         value = when.month
-        return any([matcher(value) for matcher in self.month_matchers])
+        return any([matcher(value) for matcher in self.matchers.month])
 
     def match_dow(self, when):
         value = when.weekday()
-        return any([matcher(value) for matcher in self.dow_matchers])
+        return any([matcher(value) for matcher in self.matchers.dow])
