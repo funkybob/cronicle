@@ -5,7 +5,7 @@ from datetime import datetime, tzinfo, timezone
 from functools import partial
 from typing import Tuple
 
-Pattern = namedtuple("Patter", ["minute", "hour", "dom", "month", "dow"])
+Pattern = namedtuple("Pattern", ["minute", "hour", "dom", "month", "dow"])
 
 slash_re = re.compile(r"^\*/(\d+)$")
 range_re = re.compile(r"(\d+)-(\d+)$")
