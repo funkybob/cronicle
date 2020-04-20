@@ -19,6 +19,14 @@ A simple tool for testing [crontab](https://en.wikipedia.org/wiki/Cron) like syn
     >>> c.why(d) # Ask which fragment of the rule did not match
     [True, True, True, True, False]
 
+Invalid and unparseable rules will raise an exception on creation:
+
+    >>> c = Cron('wibble')
+    ValueError: Invalid pattern: could not parse
+
+    >>> c = Cron('* * * * A')
+    ValueError: Invalid pattern: A is not a number
+
 ## crontab rule syntax
 
 ### Supported syntax:
